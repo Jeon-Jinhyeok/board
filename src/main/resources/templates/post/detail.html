@@ -24,6 +24,14 @@
 					style="animation-delay: 0.1s"
 				>
 					<div class="card-body p-4 p-md-5">
+						<!-- 카테고리 -->
+						<div th:if="${post.categoryName}" class="mb-2">
+							<span class="badge bg-info-subtle text-info">
+								<i class="bi bi-tag-fill me-1"></i>
+								<span th:text="${post.categoryName}">카테고리</span>
+							</span>
+						</div>
+
 						<!-- 제목 -->
 						<h1 class="fw-bold mb-3" th:text="${post.title}">게시글 제목</h1>
 
@@ -73,18 +81,26 @@
 							class="d-flex justify-content-center gap-3 py-4 border-top border-bottom mb-4"
 						>
 							<button
+								id="likeBtn"
 								class="btn btn-outline-primary rounded-pill px-4"
-								disabled
+								th:data-post-id="${post.id}"
+								onclick="toggleLike()"
 							>
 								<i class="bi bi-hand-thumbs-up me-1"></i>
-								좋아요 <span th:text="${post.likeCount} ?: 0">0</span>
+								좋아요
+								<span id="likeCount" th:text="${post.likeCount} ?: 0">0</span>
 							</button>
 							<button
+								id="dislikeBtn"
 								class="btn btn-outline-secondary rounded-pill px-4"
-								disabled
+								th:data-post-id="${post.id}"
+								onclick="toggleDislike()"
 							>
 								<i class="bi bi-hand-thumbs-down me-1"></i>
-								싫어요 <span th:text="${post.dislikeCount} ?: 0">0</span>
+								싫어요
+								<span id="dislikeCount" th:text="${post.dislikeCount} ?: 0"
+									>0</span
+								>
 							</button>
 							<button
 								class="btn btn-outline-warning rounded-pill px-4"
@@ -101,16 +117,25 @@
 								<i class="bi bi-arrow-left me-1"></i>목록으로
 							</a>
 
-							<div class="d-flex gap-2">
-								<!-- 작성자 본인만 수정/삭제 가능 (추후 구현) -->
-								<!--
-                        <a href="#" class="btn btn-outline-primary">
-                            <i class="bi bi-pencil me-1"></i>수정
-                        </a>
-                        <button class="btn btn-outline-danger">
-                            <i class="bi bi-trash me-1"></i>삭제
-                        </button>
-                        -->
+							<!-- 작성자 본인만 수정/삭제 버튼 표시 -->
+							<div th:if="${post.isOwner}" class="d-flex gap-2">
+								<a
+									th:href="@{/posts/{id}/edit(id=${post.id})}"
+									class="btn btn-outline-primary"
+								>
+									<i class="bi bi-pencil me-1"></i>수정
+								</a>
+								<form
+									th:action="@{/posts/{id}(id=${post.id})}"
+									method="post"
+									style="display: inline"
+									onsubmit="return confirm('정말 삭제하시겠습니까?');"
+								>
+									<input type="hidden" name="_method" value="DELETE" />
+									<button type="submit" class="btn btn-outline-danger">
+										<i class="bi bi-trash me-1"></i>삭제
+									</button>
+								</form>
 							</div>
 						</div>
 					</div>
@@ -176,5 +201,69 @@
 
 		<footer th:replace="~{fragments/layout :: footer}"></footer>
 		<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+		<script th:inline="javascript">
+			const postId = /*[[${post.id}]]*/ 0;
+
+			async function toggleLike() {
+				await toggleReaction("like");
+			}
+
+			async function toggleDislike() {
+				await toggleReaction("dislike");
+			}
+
+			async function toggleReaction(type) {
+				try {
+					const response = await fetch(`/api/posts/${postId}/${type}`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					});
+
+					if (response.status === 401) {
+						alert("로그인이 필요합니다.");
+						window.location.href = "/users/login";
+						return;
+					}
+
+					const data = await response.json();
+
+					// 카운트 업데이트
+					document.getElementById("likeCount").textContent = data.likeCount;
+					document.getElementById("dislikeCount").textContent =
+						data.dislikeCount;
+
+					// 버튼 스타일 업데이트
+					updateButtonStyles(type, data.result);
+				} catch (error) {
+					console.error("Error:", error);
+					alert("오류가 발생했습니다.");
+				}
+			}
+
+			function updateButtonStyles(type, result) {
+				const likeBtn = document.getElementById("likeBtn");
+				const dislikeBtn = document.getElementById("dislikeBtn");
+
+				// 모든 버튼 초기화
+				likeBtn.classList.remove("btn-primary");
+				likeBtn.classList.add("btn-outline-primary");
+				dislikeBtn.classList.remove("btn-secondary");
+				dislikeBtn.classList.add("btn-outline-secondary");
+
+				// 활성화된 버튼 스타일 적용
+				if (result === "created" || result === "changed") {
+					if (type === "like") {
+						likeBtn.classList.remove("btn-outline-primary");
+						likeBtn.classList.add("btn-primary");
+					} else {
+						dislikeBtn.classList.remove("btn-outline-secondary");
+						dislikeBtn.classList.add("btn-secondary");
+					}
+				}
+			}
+		</script>
 	</body>
 </html>

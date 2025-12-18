@@ -12,4 +12,7 @@ public class PostCreateRequest {
 
     @NotBlank(message="내용을 입력해주세요.")
     private String content;
+
+    private Long categoryId; // 기존 카테고리 선택 시
+    private String newCategoryName; // 새 카테고리 생성 시
 }

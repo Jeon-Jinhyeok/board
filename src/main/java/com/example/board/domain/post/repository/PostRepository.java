@@ -11,5 +11,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 전체 게시글 최신순 조회
     List<Post> findAllByOrderByCreatedAtDesc();
     
-    // 카테고리별 글 조회 ... 
+    // 카테고리별 글 조회 (최신순)
+    List<Post> findByCategoryIdOrderByCreatedAtDesc(Long categoryId);
 }

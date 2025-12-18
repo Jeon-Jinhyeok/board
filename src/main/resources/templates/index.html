@@ -24,6 +24,23 @@
 					</div>
 				</div>
 
+				<!-- 카테고리 필터 -->
+				<div class="mb-4 animate-fade-in" th:if="${categories != null and !categories.isEmpty()}">
+					<div class="d-flex flex-wrap gap-2 align-items-center">
+						<span class="text-muted small me-2"><i class="bi bi-funnel me-1"></i>카테고리:</span>
+						<a href="/" 
+						   class="btn btn-sm rounded-pill"
+						   th:classappend="${selectedCategoryId == null} ? 'btn-primary' : 'btn-outline-secondary'">
+							전체
+						</a>
+						<a th:each="category : ${categories}" 
+						   th:href="@{/(categoryId=${category.id})}"
+						   class="btn btn-sm rounded-pill"
+						   th:classappend="${selectedCategoryId == category.id} ? 'btn-primary' : 'btn-outline-secondary'"
+						   th:text="${category.name}">카테고리명</a>
+					</div>
+				</div>
+
 				<!-- 게시글 목록 카드 -->
 				<div
 					class="card card-custom animate-fade-in"
@@ -69,6 +86,7 @@
 												class="text-decoration-none text-dark fw-medium d-block text-truncate"
 												style="max-width: 400px"
 											>
+												<span th:if="${post.categoryName}" class="badge bg-info-subtle text-info me-1" th:text="${post.categoryName}">카테고리</span>
 												<span th:text="${post.title}">게시글 제목</span>
 											</a>
 										</td>

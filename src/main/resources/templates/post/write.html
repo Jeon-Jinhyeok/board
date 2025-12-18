@@ -31,6 +31,38 @@
 				>
 					<div class="card-body p-4 p-md-5">
 						<form th:action th:object="${postCreateRequest}" method="post">
+							<!-- 카테고리 선택 -->
+							<div class="mb-4">
+								<label for="categoryId" class="form-label fw-semibold">
+									<i class="bi bi-tag me-1"></i>카테고리
+								</label>
+								<select
+									id="categoryId"
+									th:field="*{categoryId}"
+									class="form-select form-control-custom"
+									onchange="toggleNewCategory(this)"
+								>
+									<option value="">카테고리 선택 (선택사항)</option>
+									<option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">카테고리명</option>
+									<option value="new">+ 새 카테고리 추가</option>
+								</select>
+							</div>
+
+							<!-- 새 카테고리 입력 (숨김) -->
+							<div class="mb-4" id="newCategoryDiv" style="display: none;">
+								<label for="newCategoryName" class="form-label fw-semibold">
+									<i class="bi bi-plus-circle me-1"></i>새 카테고리 이름
+								</label>
+								<input
+									type="text"
+									id="newCategoryName"
+									th:field="*{newCategoryName}"
+									class="form-control form-control-custom"
+									placeholder="새 카테고리 이름을 입력하세요"
+									maxlength="50"
+								/>
+							</div>
+
 							<!-- 제목 입력 -->
 							<div class="mb-4">
 								<label for="title" class="form-label fw-semibold">
@@ -114,5 +146,23 @@
 
 		<footer th:replace="~{fragments/layout :: footer}"></footer>
 		<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+		
+		<script>
+			function toggleNewCategory(select) {
+				const newCategoryDiv = document.getElementById('newCategoryDiv');
+				const newCategoryInput = document.getElementById('newCategoryName');
+				
+				if (select.value === 'new') {
+					newCategoryDiv.style.display = 'block';
+					newCategoryInput.focus();
+					// categoryId를 비워서 서버에서 newCategoryName을 사용하도록 함
+					select.value = '';
+				} else {
+					newCategoryDiv.style.display = 'none';
+					newCategoryInput.value = '';
+				}
+			}
+		</script>
 	</body>
 </html>
+

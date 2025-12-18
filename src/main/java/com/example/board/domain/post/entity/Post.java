@@ -2,7 +2,7 @@ package com.example.board.domain.post.entity;
 
 import com.example.board.domain.user.entity.User;
 import com.example.board.global.BaseTimeEntity;
-
+import com.example.board.domain.category.entity.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,6 +40,10 @@ public class Post extends BaseTimeEntity{
     @Column(nullable=false, columnDefinition = "TEXT")
     private String content;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="category_id", nullable=true)
+    private Category category;
+
     @Column(columnDefinition = "integer default 0", nullable=false)
     private Long viewCount = 0L;
     
@@ -53,10 +57,11 @@ public class Post extends BaseTimeEntity{
     private Long bookmarkCount = 0L;
 
     @Builder
-    public Post(User user, String title, String content){
+    public Post(User user, String title, String content, Category category){
         this.user = user;
         this.title = title;
         this.content = content;
+        this.category = category;
         this.viewCount = 0L;
         this.likeCount = 0L;
         this.dislikeCount = 0L;

@@ -4,15 +4,20 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 
+import com.example.board.domain.category.dto.CategoryResponse;
+import com.example.board.domain.category.service.CategoryService;
 import com.example.board.domain.post.dto.PostResponse;
 import com.example.board.domain.post.service.PostService;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
@@ -27,10 +32,23 @@ import com.example.board.domain.post.dto.PostCreateRequest;
 @RequestMapping("/posts")
 public class PostController {
     private final PostService postService;
+    private final CategoryService categoryService;
 
     @GetMapping
-    public String postList(Model model){
-        List<PostResponse> posts = postService.getAllPosts();
+    public String postList(
+            @RequestParam(required = false) Long categoryId,
+            Model model
+    ){
+        List<PostResponse> posts;
+        if (categoryId != null) {
+            posts = postService.getPostsByCategory(categoryId);
+            model.addAttribute("selectedCategoryId", categoryId);
+        } else {
+            posts = postService.getAllPosts();
+        }
+        
+        List<CategoryResponse> categories = categoryService.getAllCategories();
+        model.addAttribute("categories", categories);
         model.addAttribute("posts", posts);
         return "post/list";
     }
@@ -43,10 +61,8 @@ public class PostController {
         Long loginUserId = null;
         if (session != null && session.getAttribute("loginUserId") != null) {
             loginUserId = (Long) session.getAttribute("loginUserId");
-            model.addAttribute("loginUserId", loginUserId);
         }
         
-        // Service에 loginUserId 전달 (조회수 처리용)
         PostResponse post = postService.getPost(postId, loginUserId);
         model.addAttribute("post", post);
         
@@ -61,6 +77,8 @@ public class PostController {
             return "redirect:/users/login";
         }
 
+        List<CategoryResponse> categories = categoryService.getAllCategories();
+        model.addAttribute("categories", categories);
         model.addAttribute("postCreateRequest", new PostCreateRequest());
 
         return "post/write";
@@ -87,4 +105,18 @@ public class PostController {
         Long postId = postService.write(userId, request);
         return "redirect:/posts/" + postId; // 작성한 글 상세페이지로 이동
     }
+
+    // 게시물 삭제
+    @DeleteMapping("/{postId}")
+    public String deletePost(@PathVariable Long postId, HttpServletRequest request){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("loginUserId") == null){
+            return "redirect:/users/login";
+        }
+
+        Long userId = (Long) session.getAttribute("loginUserId");
+        postService.deletePost(postId, userId);
+        return "redirect:/";
+    }
+    
 }
