@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head th:replace="~{fragments/layout :: head('Spring Board - 홈')}"></head>
+	<body class="d-flex flex-column">
+		<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+		<main class="flex-grow-1 py-5">
+			<div class="container" style="max-width: 1000px">
+				<!-- 헤더 섹션 -->
+				<div
+					class="d-flex justify-content-between align-items-center mb-4 animate-fade-in"
+				>
+					<div>
+						<h2 class="fw-bold mb-1">
+							<i class="bi bi-chat-square-text text-primary me-2"></i>자유
+							게시판
+						</h2>
+						<p class="text-muted mb-0">다양한 이야기를 자유롭게 나눠보세요</p>
+					</div>
+					<div th:if="${session.loginUserId != null}">
+						<a href="/posts/write" class="btn btn-primary-custom">
+							<i class="bi bi-pencil-square me-1"></i>글쓰기
+						</a>
+					</div>
+				</div>
+
+				<!-- 게시글 목록 카드 -->
+				<div
+					class="card card-custom animate-fade-in"
+					style="animation-delay: 0.1s"
+				>
+					<div class="card-body p-0">
+						<div class="table-responsive">
+							<table class="table table-custom mb-0">
+								<thead>
+									<tr>
+										<th style="width: 8%" class="text-center">번호</th>
+										<th style="width: 52%">제목</th>
+										<th style="width: 15%" class="text-center">작성자</th>
+										<th style="width: 15%" class="text-center">작성일</th>
+										<th style="width: 10%" class="text-center">조회</th>
+									</tr>
+								</thead>
+								<tbody>
+									<!-- 게시글이 없을 때 -->
+									<tr th:if="${posts == null or posts.isEmpty()}">
+										<td colspan="5" class="text-center py-5">
+											<div class="text-muted">
+												<i class="bi bi-inbox fs-1 d-block mb-3"></i>
+												<p class="mb-2">아직 게시글이 없습니다</p>
+												<p class="small" th:if="${session.loginUserId != null}">
+													첫 번째 글을 작성해보세요!
+												</p>
+												<p class="small" th:if="${session.loginUserId == null}">
+													로그인하고 첫 번째 글을 작성해보세요!
+												</p>
+											</div>
+										</td>
+									</tr>
+
+									<!-- 게시글 목록 -->
+									<tr th:each="post, iterStat : ${posts}">
+										<td class="text-center text-muted" th:text="${post.id}">
+											1
+										</td>
+										<td>
+											<a
+												th:href="@{|/posts/${post.id}|}"
+												class="text-decoration-none text-dark fw-medium d-block text-truncate"
+												style="max-width: 400px"
+											>
+												<span th:text="${post.title}">게시글 제목</span>
+											</a>
+										</td>
+										<td class="text-center">
+											<span
+												class="badge bg-light text-dark"
+												th:text="${post.writer}"
+												>작성자</span
+											>
+										</td>
+										<td
+											class="text-center text-muted small"
+											th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd')}"
+										>
+											2024.01.01
+										</td>
+										<td class="text-center">
+											<span class="badge bg-primary-subtle text-primary">
+												<i class="bi bi-eye me-1"></i>
+												<span th:text="${post.viewCount} ?: 0">0</span>
+											</span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- 페이지네이션 -->
+				<nav
+					class="mt-4 animate-fade-in"
+					style="animation-delay: 0.2s"
+					th:if="${posts != null and !posts.isEmpty()}"
+				>
+					<ul class="pagination justify-content-center">
+						<li class="page-item disabled">
+							<a class="page-link" href="#" tabindex="-1">
+								<i class="bi bi-chevron-left"></i>
+							</a>
+						</li>
+						<li class="page-item active">
+							<a class="page-link" href="#">1</a>
+						</li>
+						<li class="page-item"><a class="page-link" href="#">2</a></li>
+						<li class="page-item"><a class="page-link" href="#">3</a></li>
+						<li class="page-item">
+							<a class="page-link" href="#">
+								<i class="bi bi-chevron-right"></i>
+							</a>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</main>
+
+		<footer th:replace="~{fragments/layout :: footer}"></footer>
+		<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+	</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head
+		th:replace="~{fragments/layout :: head('글쓰기 - Spring Board')}"
+	></head>
+	<body class="d-flex flex-column">
+		<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+		<main class="flex-grow-1 py-5">
+			<div class="container" style="max-width: 800px">
+				<!-- 헤더 -->
+				<div class="mb-4 animate-fade-in">
+					<nav aria-label="breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item">
+								<a href="/" class="text-decoration-none">홈</a>
+							</li>
+							<li class="breadcrumb-item active">글쓰기</li>
+						</ol>
+					</nav>
+					<h2 class="fw-bold">
+						<i class="bi bi-pencil-square text-primary me-2"></i>새 글 작성
+					</h2>
+					<p class="text-muted">자유롭게 글을 작성해보세요</p>
+				</div>
+
+				<!-- 글쓰기 폼 카드 -->
+				<div
+					class="card card-custom animate-fade-in"
+					style="animation-delay: 0.1s"
+				>
+					<div class="card-body p-4 p-md-5">
+						<form th:action th:object="${postCreateRequest}" method="post">
+							<!-- 제목 입력 -->
+							<div class="mb-4">
+								<label for="title" class="form-label fw-semibold">
+									<i class="bi bi-type me-1"></i>제목
+								</label>
+								<input
+									type="text"
+									id="title"
+									th:field="*{title}"
+									class="form-control form-control-custom form-control-lg"
+									th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+									placeholder="제목을 입력하세요"
+									maxlength="100"
+								/>
+								<div class="invalid-feedback" th:errors="*{title}">
+									제목 오류
+								</div>
+							</div>
+
+							<!-- 내용 입력 -->
+							<div class="mb-4">
+								<label for="content" class="form-label fw-semibold">
+									<i class="bi bi-text-paragraph me-1"></i>내용
+								</label>
+								<textarea
+									id="content"
+									th:field="*{content}"
+									class="form-control form-control-custom"
+									th:classappend="${#fields.hasErrors('content')} ? 'is-invalid' : ''"
+									rows="15"
+									placeholder="내용을 입력하세요"
+									style="resize: vertical; min-height: 300px"
+								></textarea>
+								<div class="invalid-feedback" th:errors="*{content}">
+									내용 오류
+								</div>
+							</div>
+
+							<!-- 버튼 그룹 -->
+							<div
+								class="d-flex justify-content-between align-items-center pt-3 border-top"
+							>
+								<a href="/" class="btn btn-outline-secondary px-4">
+									<i class="bi bi-arrow-left me-1"></i>취소
+								</a>
+								<button type="submit" class="btn btn-primary-custom px-4 py-2">
+									<i class="bi bi-check-lg me-1"></i>등록하기
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+
+				<!-- 작성 팁 -->
+				<div
+					class="card card-custom mt-4 animate-fade-in"
+					style="animation-delay: 0.2s"
+				>
+					<div class="card-body">
+						<h6 class="fw-bold mb-3">
+							<i class="bi bi-lightbulb text-warning me-2"></i>작성 팁
+						</h6>
+						<ul class="list-unstyled mb-0 text-muted small">
+							<li class="mb-2">
+								<i class="bi bi-check-circle text-success me-2"></i>
+								명확하고 구체적인 제목을 작성해주세요
+							</li>
+							<li class="mb-2">
+								<i class="bi bi-check-circle text-success me-2"></i>
+								다른 사용자를 존중하는 언어를 사용해주세요
+							</li>
+							<li>
+								<i class="bi bi-check-circle text-success me-2"></i>
+								관련 없는 내용이나 광고는 삭제될 수 있습니다
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<footer th:replace="~{fragments/layout :: footer}"></footer>
+		<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+	</body>
+</html>

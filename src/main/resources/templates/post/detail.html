@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head
+		th:replace="~{fragments/layout :: head('게시글 - Spring Board')}"
+	></head>
+	<body class="d-flex flex-column">
+		<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+		<main class="flex-grow-1 py-5">
+			<div class="container" style="max-width: 900px">
+				<!-- Breadcrumb -->
+				<nav aria-label="breadcrumb" class="animate-fade-in">
+					<ol class="breadcrumb">
+						<li class="breadcrumb-item">
+							<a href="/" class="text-decoration-none">홈</a>
+						</li>
+						<li class="breadcrumb-item active">게시글</li>
+					</ol>
+				</nav>
+
+				<!-- 게시글 카드 -->
+				<div
+					class="card card-custom animate-fade-in"
+					style="animation-delay: 0.1s"
+				>
+					<div class="card-body p-4 p-md-5">
+						<!-- 제목 -->
+						<h1 class="fw-bold mb-3" th:text="${post.title}">게시글 제목</h1>
+
+						<!-- 메타 정보 -->
+						<div
+							class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-4 border-bottom"
+						>
+							<div class="d-flex align-items-center">
+								<div
+									class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2"
+									style="width: 36px; height: 36px"
+								>
+									<i class="bi bi-person-fill text-white small"></i>
+								</div>
+								<div>
+									<span class="fw-semibold" th:text="${post.writer}"
+										>작성자</span
+									>
+								</div>
+							</div>
+
+							<div class="text-muted small">
+								<i class="bi bi-calendar3 me-1"></i>
+								<span
+									th:text="${#temporals.format(post.createdAt, 'yyyy년 MM월 dd일 HH:mm')}"
+									>2024년 01월 01일 12:00</span
+								>
+							</div>
+
+							<div class="text-muted small">
+								<i class="bi bi-eye me-1"></i>
+								조회 <span th:text="${post.viewCount} ?: 0">0</span>
+							</div>
+						</div>
+
+						<!-- 본문 내용 -->
+						<div
+							class="post-content mb-4"
+							style="min-height: 200px; line-height: 1.8; white-space: pre-wrap"
+							th:text="${post.content}"
+						>
+							게시글 내용이 여기에 표시됩니다.
+						</div>
+
+						<!-- 좋아요/싫어요/북마크 -->
+						<div
+							class="d-flex justify-content-center gap-3 py-4 border-top border-bottom mb-4"
+						>
+							<button
+								class="btn btn-outline-primary rounded-pill px-4"
+								disabled
+							>
+								<i class="bi bi-hand-thumbs-up me-1"></i>
+								좋아요 <span th:text="${post.likeCount} ?: 0">0</span>
+							</button>
+							<button
+								class="btn btn-outline-secondary rounded-pill px-4"
+								disabled
+							>
+								<i class="bi bi-hand-thumbs-down me-1"></i>
+								싫어요 <span th:text="${post.dislikeCount} ?: 0">0</span>
+							</button>
+							<button
+								class="btn btn-outline-warning rounded-pill px-4"
+								disabled
+							>
+								<i class="bi bi-bookmark me-1"></i>
+								북마크 <span th:text="${post.bookmarkCount} ?: 0">0</span>
+							</button>
+						</div>
+
+						<!-- 하단 버튼들 -->
+						<div class="d-flex justify-content-between align-items-center">
+							<a href="/" class="btn btn-outline-secondary">
+								<i class="bi bi-arrow-left me-1"></i>목록으로
+							</a>
+
+							<div class="d-flex gap-2">
+								<!-- 작성자 본인만 수정/삭제 가능 (추후 구현) -->
+								<!--
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>수정
+                        </a>
+                        <button class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i>삭제
+                        </button>
+                        -->
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- 댓글 섹션 (추후 구현을 위한 UI) -->
+				<div
+					class="card card-custom mt-4 animate-fade-in"
+					style="animation-delay: 0.2s"
+				>
+					<div class="card-body p-4">
+						<h5 class="fw-bold mb-4">
+							<i class="bi bi-chat-dots me-2"></i>댓글
+							<span class="badge bg-primary-subtle text-primary ms-2">0</span>
+						</h5>
+
+						<!-- 댓글 작성 폼 -->
+						<div th:if="${session.loginUserId != null}" class="mb-4">
+							<div class="d-flex gap-3">
+								<div
+									class="bg-secondary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+									style="width: 40px; height: 40px"
+								>
+									<i class="bi bi-person-fill text-white"></i>
+								</div>
+								<div class="flex-grow-1">
+									<textarea
+										class="form-control form-control-custom"
+										rows="3"
+										placeholder="댓글을 작성해주세요 (추후 구현 예정)"
+										disabled
+									></textarea>
+									<div class="text-end mt-2">
+										<button class="btn btn-primary-custom btn-sm" disabled>
+											<i class="bi bi-send me-1"></i>등록
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div
+							th:if="${session.loginUserId == null}"
+							class="text-center py-4 text-muted"
+						>
+							<i class="bi bi-lock fs-3 d-block mb-2"></i>
+							<p class="mb-2">댓글을 작성하려면 로그인이 필요합니다</p>
+							<a href="/users/login" class="btn btn-outline-primary btn-sm">
+								<i class="bi bi-box-arrow-in-right me-1"></i>로그인하기
+							</a>
+						</div>
+
+						<!-- 댓글 목록 -->
+						<div class="text-center py-4 text-muted border-top">
+							<i class="bi bi-chat-left fs-3 d-block mb-2"></i>
+							<p class="mb-0">아직 댓글이 없습니다</p>
+							<p class="small">첫 번째 댓글을 작성해보세요!</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<footer th:replace="~{fragments/layout :: footer}"></footer>
+		<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+	</body>
+</html>
