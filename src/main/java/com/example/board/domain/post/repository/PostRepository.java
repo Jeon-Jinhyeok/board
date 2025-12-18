@@ -1,0 +1,15 @@
+package com.example.board.domain.post.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.board.domain.post.entity.Post;
+
+public interface PostRepository extends JpaRepository<Post, Long> {
+    
+    // 전체 게시글 최신순 조회
+    List<Post> findAllByOrderByCreatedAtDesc();
+    
+    // 카테고리별 글 조회 ... 
+}
