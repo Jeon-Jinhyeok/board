@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 
+import com.example.board.domain.bookmark.service.BookmarkService;
 import com.example.board.domain.category.dto.CategoryResponse;
 import com.example.board.domain.category.service.CategoryService;
 import com.example.board.domain.comment.dto.CommentResponse;
@@ -14,6 +15,8 @@ import com.example.board.domain.comment.service.CommentService;
 import com.example.board.domain.post.dto.PostResponse;
 import com.example.board.domain.post.dto.PostUpdateRequest;
 import com.example.board.domain.post.service.PostService;
+import com.example.board.domain.user.entity.User;
+import com.example.board.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,6 +44,8 @@ public class PostController {
     private final PostService postService;
     private final CategoryService categoryService;
     private final CommentService commentService;
+    private final BookmarkService bookmarkService;
+    private final UserService userService;
 
     @GetMapping
     public String postList(
@@ -77,8 +82,17 @@ public class PostController {
             loginUserId = (Long) session.getAttribute("loginUserId");
         }
         
+        User loginUser = userService.findById(loginUserId);
+        if (loginUser != null) {
+            model.addAttribute("loginUser", loginUser);
+        }
+        model.addAttribute("loginUser", loginUser);
         PostResponse post = postService.getPost(postId, loginUserId);
         model.addAttribute("post", post);
+
+        // 북마크 여부 조회
+        boolean isBookmarked = bookmarkService.isBookmarked(loginUserId, postId);
+        model.addAttribute("isBookmarked", isBookmarked);
 
         // 댓글 목록 조회 
         Pageable pageable = PageRequest.of(page, size);

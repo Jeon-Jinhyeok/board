@@ -103,11 +103,17 @@
 								>
 							</button>
 							<button
-								class="btn btn-outline-warning rounded-pill px-4"
-								disabled
+								id="bookmarkBtn"
+								class="btn rounded-pill px-4"
+								th:classappend="${isBookmarked} ? 'btn-warning' : 'btn-outline-warning'"
+								onclick="toggleBookmark()"
 							>
-								<i class="bi bi-bookmark me-1"></i>
-								북마크 <span th:text="${post.bookmarkCount} ?: 0">0</span>
+								<i
+									id="bookmarkIcon"
+									class="bi me-1"
+									th:classappend="${isBookmarked} ? 'bi-bookmark-fill' : 'bi-bookmark'"
+								></i>
+								북마크
 							</button>
 						</div>
 
@@ -423,9 +429,9 @@
 									</li>
 
 									<!-- 페이지 번호 -->
-								<th:block
-									th:with="start=${T(java.lang.Math).max(0, comments.number - 2)}, end=${T(java.lang.Math).min(comments.totalPages - 1, comments.number + 2)}"
-								>
+									<th:block
+										th:with="start=${T(java.lang.Math).max(0, comments.number - 2)}, end=${T(java.lang.Math).min(comments.totalPages - 1, comments.number + 2)}"
+									>
 										<li
 											th:each="i : ${#numbers.sequence(start, end)}"
 											class="page-item"
@@ -635,6 +641,42 @@
 
 			async function toggleDislike() {
 				await toggleReaction("dislike");
+			}
+
+			async function toggleBookmark() {
+				try {
+					const response = await fetch(`/api/bookmarks/${postId}`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					});
+
+					if (response.status === 401) {
+						alert("로그인이 필요합니다.");
+						window.location.href = "/users/login";
+						return;
+					}
+
+					const data = await response.json();
+					const btn = document.getElementById("bookmarkBtn");
+					const icon = btn.querySelector("i");
+
+					if (data.bookmarked) {
+						btn.classList.remove("btn-outline-warning");
+						btn.classList.add("btn-warning");
+						icon.classList.remove("bi-bookmark");
+						icon.classList.add("bi-bookmark-fill");
+					} else {
+						btn.classList.remove("btn-warning");
+						btn.classList.add("btn-outline-warning");
+						icon.classList.remove("bi-bookmark-fill");
+						icon.classList.add("bi-bookmark");
+					}
+				} catch (error) {
+					console.error("Error:", error);
+					alert("오류가 발생했습니다.");
+				}
 			}
 
 			async function toggleReaction(type) {

@@ -46,4 +46,8 @@ public class UserService {
         return user.getId();
     }
 
+    // 사용자 조회
+    public User findById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
 }

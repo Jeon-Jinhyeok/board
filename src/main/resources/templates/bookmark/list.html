@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head
+		th:replace="~{fragments/layout :: head('내 북마크 - Spring Board')}"
+	></head>
+	<body class="d-flex flex-column">
+		<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+		<main class="flex-grow-1 py-5">
+			<div class="container" style="max-width: 1000px">
+				<!-- 헤더 섹션 -->
+				<div
+					class="d-flex justify-content-between align-items-center mb-4 animate-fade-in"
+				>
+					<div>
+						<h2 class="fw-bold mb-1">
+							<i class="bi bi-bookmark-heart text-warning me-2"></i>내 북마크
+						</h2>
+						<p class="text-muted mb-0">저장한 게시글을 모아볼 수 있습니다</p>
+					</div>
+					<div>
+						<a href="/" class="btn btn-outline-secondary">
+							<i class="bi bi-arrow-left me-1"></i>목록으로
+						</a>
+					</div>
+				</div>
+
+				<!-- 게시글 목록 카드 -->
+				<div
+					class="card card-custom animate-fade-in"
+					style="animation-delay: 0.1s"
+				>
+					<div class="card-body p-0">
+						<div class="table-responsive">
+							<table class="table table-custom mb-0">
+								<thead>
+									<tr>
+										<th style="width: 8%" class="text-center">번호</th>
+										<th style="width: 52%">제목</th>
+										<th style="width: 15%" class="text-center">작성자</th>
+										<th style="width: 15%" class="text-center">작성일</th>
+										<th style="width: 10%" class="text-center">조회</th>
+									</tr>
+								</thead>
+								<tbody>
+									<!-- 북마크가 없을 때 -->
+									<tr th:if="${posts == null or posts.isEmpty()}">
+										<td colspan="5" class="text-center py-5">
+											<div class="text-muted">
+												<i class="bi bi-bookmark fs-1 d-block mb-3"></i>
+												<p class="mb-2">북마크한 게시글이 없습니다</p>
+												<p class="small">
+													마음에 드는 게시글을 북마크해보세요!
+												</p>
+												<a href="/" class="btn btn-primary-custom btn-sm mt-2">
+													<i class="bi bi-house me-1"></i>게시글 둘러보기
+												</a>
+											</div>
+										</td>
+									</tr>
+
+									<!-- 북마크 목록 -->
+									<tr th:each="post, iterStat : ${posts}">
+										<td class="text-center text-muted" th:text="${post.id}">
+											1
+										</td>
+										<td>
+											<a
+												th:href="@{|/posts/${post.id}|}"
+												class="text-decoration-none text-dark fw-medium d-block text-truncate"
+												style="max-width: 400px"
+											>
+												<i class="bi bi-bookmark-fill text-warning me-1"></i>
+												<span
+													th:if="${post.categoryName}"
+													class="badge bg-info-subtle text-info me-1"
+													th:text="${post.categoryName}"
+													>카테고리</span
+												>
+												<span th:text="${post.title}">게시글 제목</span>
+											</a>
+										</td>
+										<td class="text-center">
+											<span
+												class="badge bg-light text-dark"
+												th:text="${post.writer}"
+												>작성자</span
+											>
+										</td>
+										<td
+											class="text-center text-muted small"
+											th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd')}"
+										>
+											2024.01.01
+										</td>
+										<td class="text-center">
+											<span class="badge bg-primary-subtle text-primary">
+												<i class="bi bi-eye me-1"></i>
+												<span th:text="${post.viewCount} ?: 0">0</span>
+											</span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<footer th:replace="~{fragments/layout :: footer}"></footer>
+		<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+	</body>
+</html>

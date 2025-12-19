@@ -10,17 +10,17 @@ import com.example.board.domain.category.dto.CategoryResponse;
 import com.example.board.domain.category.service.CategoryService;
 import com.example.board.domain.post.dto.PostResponse;
 import com.example.board.domain.post.service.PostService;
-import com.example.board.domain.user.repository.UserRepository;
+import com.example.board.domain.user.entity.User;
+import com.example.board.domain.user.service.UserService;
 import org.springframework.ui.Model;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import com.example.board.domain.user.entity.User;
 
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final PostService postService;
     private final CategoryService categoryService;
 
@@ -50,7 +50,7 @@ public class HomeController {
         }
 
         Long userId = (Long) session.getAttribute("loginUserId");
-        User loginUser = userRepository.findById(userId).orElse(null);
+        User loginUser = userService.findById(userId);
 
         if(loginUser != null){
             model.addAttribute("loginUser", loginUser);
