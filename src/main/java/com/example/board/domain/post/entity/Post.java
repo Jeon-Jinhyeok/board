@@ -44,6 +44,8 @@ public class Post extends BaseTimeEntity{
     @JoinColumn(name="category_id", nullable=true)
     private Category category;
 
+    
+
     @Column(columnDefinition = "integer default 0", nullable=false)
     private Long viewCount = 0L;
     

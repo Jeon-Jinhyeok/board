@@ -61,7 +61,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long write(Long userId, PostCreateRequest request){
+    public Long writePost(Long userId, PostCreateRequest request){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 

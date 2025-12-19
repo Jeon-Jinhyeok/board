@@ -2,10 +2,15 @@ package com.example.board.domain.post.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 
 import com.example.board.domain.category.dto.CategoryResponse;
 import com.example.board.domain.category.service.CategoryService;
+import com.example.board.domain.comment.dto.CommentResponse;
+import com.example.board.domain.comment.service.CommentService;
 import com.example.board.domain.post.dto.PostResponse;
 import com.example.board.domain.post.service.PostService;
 
@@ -33,6 +38,7 @@ import com.example.board.domain.post.dto.PostCreateRequest;
 public class PostController {
     private final PostService postService;
     private final CategoryService categoryService;
+    private final CommentService commentService;
 
     @GetMapping
     public String postList(
@@ -55,7 +61,13 @@ public class PostController {
 
     // 게시글 상세 조회
     @GetMapping("/{postId}")
-    public String postDetail(@PathVariable Long postId, Model model, HttpServletRequest request) {
+    public String postDetail(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model,
+            HttpServletRequest request
+    ) {
         // 세션에서 로그인 사용자 ID 추출 (비로그인이면 null)
         HttpSession session = request.getSession(false);
         Long loginUserId = null;
@@ -65,6 +77,12 @@ public class PostController {
         
         PostResponse post = postService.getPost(postId, loginUserId);
         model.addAttribute("post", post);
+
+        // 댓글 목록 조회 
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CommentResponse> comments = commentService.getCommentsByPostId(postId, loginUserId, pageable);
+        model.addAttribute("comments", comments);
+        model.addAttribute("totalCommentCount", commentService.getTotalCommentCount(postId));
         
         return "post/detail";
     }
@@ -102,7 +120,7 @@ public class PostController {
 
         Long userId = (Long) session.getAttribute("loginUserId");
         // 저장
-        Long postId = postService.write(userId, request);
+        Long postId = postService.writePost(userId, request);
         return "redirect:/posts/" + postId; // 작성한 글 상세페이지로 이동
     }
 

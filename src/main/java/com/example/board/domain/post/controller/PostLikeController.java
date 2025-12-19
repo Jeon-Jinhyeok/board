@@ -59,10 +59,4 @@ public class PostLikeController {
             "dislikeCount", counts.get("dislikeCount")
         ));
     }
-    
-
-    
-
-    
-
 }
