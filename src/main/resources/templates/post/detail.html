@@ -423,9 +423,9 @@
 									</li>
 
 									<!-- 페이지 번호 -->
-									<th:block
-										th:with="start=${T(Math).max(0, comments.number - 2)}, end=${T(Math).min(comments.totalPages - 1, comments.number + 2)}"
-									>
+								<th:block
+									th:with="start=${T(java.lang.Math).max(0, comments.number - 2)}, end=${T(java.lang.Math).min(comments.totalPages - 1, comments.number + 2)}"
+								>
 										<li
 											th:each="i : ${#numbers.sequence(start, end)}"
 											class="page-item"
