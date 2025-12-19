@@ -132,7 +132,7 @@ class UserServiceTest {
             given(passwordEncoder.matches("password123", "encodedPassword")).willReturn(true);
 
             // When: 로그인을 시도하면
-            Long userId = userService.login(request);
+            User userId = userService.login(request);
 
             // Then: 사용자 ID가 반환된다
             assertThat(userId).isEqualTo(user.getId());

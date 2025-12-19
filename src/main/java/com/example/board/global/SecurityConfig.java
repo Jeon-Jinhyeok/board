@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .requestMatchers("/", "/users/signup", "/users/login", "/users/logout").permitAll()
                 // 게시글 조회는 모두 허용 (GET)
                 .requestMatchers("/posts", "/posts/**").permitAll()
+                // Swagger 관련 URL 허용 (인터셉터에서 ADMIN 권한 체크)
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 // 그 외 모든 요청도 허용 (세션 기반 인증을 직접 구현하므로)
                 .anyRequest().permitAll()
             );

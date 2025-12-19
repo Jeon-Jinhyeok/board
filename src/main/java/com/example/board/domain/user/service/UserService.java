@@ -36,14 +36,14 @@ public class UserService {
         return userRepository.save(request.toEntity(encodedPassword)).getId();
     }
 
-    public Long login(LoginRequest request){
+    public User login(LoginRequest request){
         User user = userRepository.findByLoginId(request.getLoginId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        return user.getId();
+        return user;
     }
 
     // 사용자 조회

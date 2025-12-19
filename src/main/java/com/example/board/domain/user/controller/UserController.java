@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.board.domain.user.dto.SignupRequest;
 import com.example.board.domain.user.dto.LoginRequest;
+import com.example.board.domain.user.entity.User;
 import com.example.board.domain.user.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,11 +62,12 @@ public class UserController {
             return "user/login";
         }
         try{
-            Long userId = userService.login(loginRequest);
+            User user = userService.login(loginRequest);
 
             HttpSession session = httpRequest.getSession(true);
 
-            session.setAttribute("loginUserId", userId);
+            session.setAttribute("loginUserId", user.getId());
+            session.setAttribute("loginUserRole", user.getRole());
         } catch (IllegalArgumentException e){
             bindingResult.reject("loginFail", e.getMessage());
             return "user/login";
