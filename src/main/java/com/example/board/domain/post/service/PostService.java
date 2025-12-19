@@ -17,6 +17,7 @@ import com.example.board.domain.user.repository.UserRepository;
 import com.example.board.domain.user.entity.User;
 import com.example.board.domain.post.dto.PostCreateRequest;
 import com.example.board.domain.post.dto.PostResponse;
+import com.example.board.domain.post.dto.PostUpdateRequest;
 import com.example.board.domain.post.entity.Post;
 
 @Service
@@ -83,6 +84,24 @@ public class PostService {
                 .build();
 
         return postRepository.save(post).getId();
+    }
+
+    @Transactional
+    public void updatePost(Long postId, Long userId, PostUpdateRequest request){
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+        
+        // 작성자 본인만 수정 가능
+        if (!post.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("본인이 작성한 게시글만 수정할 수 있습니다.");
+        }
+        
+        Category category = null;
+        if(request.getCategoryId() != null){
+            category = categoryService.findById(request.getCategoryId());
+        }
+
+        post.update(request.getTitle(), request.getContent(), category);
     }
 
     // 게시글 삭제

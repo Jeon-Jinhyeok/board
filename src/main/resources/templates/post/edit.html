@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head
+		th:replace="~{fragments/layout :: head('글 수정 - Spring Board')}"
+	></head>
+	<body class="d-flex flex-column">
+		<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+		<main class="flex-grow-1 py-5">
+			<div class="container" style="max-width: 800px">
+				<!-- 헤더 -->
+				<div class="mb-4 animate-fade-in">
+					<nav aria-label="breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item">
+								<a href="/" class="text-decoration-none">홈</a>
+							</li>
+							<li class="breadcrumb-item">
+								<a th:href="@{/posts/{id}(id=${post.id})}" class="text-decoration-none">게시글</a>
+							</li>
+							<li class="breadcrumb-item active">수정</li>
+						</ol>
+					</nav>
+					<h2 class="fw-bold">
+						<i class="bi bi-pencil text-primary me-2"></i>글 수정
+					</h2>
+					<p class="text-muted">게시글 내용을 수정합니다</p>
+				</div>
+
+				<!-- 글 수정 폼 카드 -->
+				<div
+					class="card card-custom animate-fade-in"
+					style="animation-delay: 0.1s"
+				>
+					<div class="card-body p-4 p-md-5">
+						<form th:action="@{/posts/{id}(id=${post.id})}" method="post">
+							<input type="hidden" name="_method" value="PUT" />
+							
+							<!-- 카테고리 선택 -->
+							<div class="mb-4">
+								<label for="categoryId" class="form-label fw-semibold">
+									<i class="bi bi-tag me-1"></i>카테고리
+								</label>
+								<select
+									id="categoryId"
+									name="categoryId"
+									class="form-select form-control-custom"
+								>
+									<option value="">카테고리 선택 (선택사항)</option>
+									<option 
+										th:each="category : ${categories}" 
+										th:value="${category.id}" 
+										th:text="${category.name}"
+										th:selected="${post.categoryId == category.id}"
+									>카테고리명</option>
+								</select>
+							</div>
+
+							<!-- 제목 입력 -->
+							<div class="mb-4">
+								<label for="title" class="form-label fw-semibold">
+									<i class="bi bi-type me-1"></i>제목
+								</label>
+								<input
+									type="text"
+									id="title"
+									name="title"
+									class="form-control form-control-custom form-control-lg"
+									placeholder="제목을 입력하세요"
+									maxlength="100"
+									th:value="${post.title}"
+									required
+								/>
+							</div>
+
+							<!-- 내용 입력 -->
+							<div class="mb-4">
+								<label for="content" class="form-label fw-semibold">
+									<i class="bi bi-text-paragraph me-1"></i>내용
+								</label>
+								<textarea
+									id="content"
+									name="content"
+									class="form-control form-control-custom"
+									rows="15"
+									placeholder="내용을 입력하세요"
+									style="resize: vertical; min-height: 300px"
+									required
+									th:text="${post.content}"
+								></textarea>
+							</div>
+
+							<!-- 버튼 그룹 -->
+							<div
+								class="d-flex justify-content-between align-items-center pt-3 border-top"
+							>
+								<a th:href="@{/posts/{id}(id=${post.id})}" class="btn btn-outline-secondary px-4">
+									<i class="bi bi-arrow-left me-1"></i>취소
+								</a>
+								<button type="submit" class="btn btn-primary-custom px-4 py-2">
+									<i class="bi bi-check-lg me-1"></i>수정하기
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<footer th:replace="~{fragments/layout :: footer}"></footer>
+		<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+	</body>
+</html>
+

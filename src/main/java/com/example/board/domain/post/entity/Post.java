@@ -73,9 +73,10 @@ public class Post extends BaseTimeEntity{
     // -- 비즈니스 로직 -- 
 
     // 게시글 수정
-    public void update(String title, String content){
+    public void update(String title, String content, Category category){
         this.title = title;
         this.content = content;
+        this.category = category;
     }
 
     // 조회수 증가

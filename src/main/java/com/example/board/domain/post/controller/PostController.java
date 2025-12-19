@@ -12,6 +12,7 @@ import com.example.board.domain.category.service.CategoryService;
 import com.example.board.domain.comment.dto.CommentResponse;
 import com.example.board.domain.comment.service.CommentService;
 import com.example.board.domain.post.dto.PostResponse;
+import com.example.board.domain.post.dto.PostUpdateRequest;
 import com.example.board.domain.post.service.PostService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
@@ -122,6 +124,37 @@ public class PostController {
         // 저장
         Long postId = postService.writePost(userId, request);
         return "redirect:/posts/" + postId; // 작성한 글 상세페이지로 이동
+    }
+
+    @GetMapping("/{postId}/edit")
+    public String editPostPage(@PathVariable Long postId, Model model, HttpServletRequest request){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("loginUserId") == null){
+            return "redirect:/users/login";
+        }
+
+        Long userId = (Long) session.getAttribute("loginUserId");
+        PostResponse post = postService.getPost(postId, userId);
+
+        model.addAttribute("post", post);
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "post/edit";
+    }
+
+    @PutMapping("/{postId}")
+    public String updatePost(
+        @PathVariable Long postId,
+        @Valid @ModelAttribute PostUpdateRequest request,
+        HttpServletRequest httpRequest
+    ){
+        HttpSession session = httpRequest.getSession(false);
+        if(session == null || session.getAttribute("loginUserId") == null){
+            return "redirect:/users/login";
+        }
+
+        Long userId = (Long) session.getAttribute("loginUserId");
+        postService.updatePost(postId, userId, request);
+        return "redirect:/posts/" + postId;
     }
 
     // 게시물 삭제
