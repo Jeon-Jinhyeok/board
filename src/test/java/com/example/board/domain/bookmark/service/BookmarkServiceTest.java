@@ -31,6 +31,7 @@ import com.example.board.domain.user.repository.UserRepository;
  * 
  * Narrative: 북마크 서비스는 사용자가 게시글을 북마크하고 관리할 수 있는 기능을 제공한다.
  *            북마크 토글, 추가, 삭제, 조회 기능을 지원한다.
+ *            북마크 추가/삭제 시 게시글의 bookmarkCount가 함께 업데이트된다.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("BookmarkService 단위 테스트")
@@ -94,8 +95,9 @@ class BookmarkServiceTest {
             // When: 북마크를 토글하면
             boolean result = bookmarkService.toggleBookmark(userId, postId);
 
-            // Then: 북마크가 추가되고 true가 반환된다
+            // Then: 북마크가 추가되고 true가 반환되며, bookmarkCount가 증가한다
             assertThat(result).isTrue();
+            assertThat(testPost.getBookmarkCount()).isEqualTo(1L);
             then(bookmarkRepository).should().save(any(Bookmark.class));
         }
 
@@ -105,14 +107,19 @@ class BookmarkServiceTest {
             // Given: 사용자가 이미 게시글을 북마크한 상태일 때
             Long userId = 1L;
             Long postId = 1L;
+            
+            // 기존 북마크로 인해 bookmarkCount가 1
+            testPost.increaseBookmarkCount();
 
             given(bookmarkRepository.existsByUserIdAndPostId(userId, postId)).willReturn(true);
+            given(postRepository.findById(postId)).willReturn(Optional.of(testPost));
 
             // When: 북마크를 토글하면
             boolean result = bookmarkService.toggleBookmark(userId, postId);
 
-            // Then: 북마크가 삭제되고 false가 반환된다
+            // Then: 북마크가 삭제되고 false가 반환되며, bookmarkCount가 감소한다
             assertThat(result).isFalse();
+            assertThat(testPost.getBookmarkCount()).isEqualTo(0L);
             then(bookmarkRepository).should().deleteByUserIdAndPostId(userId, postId);
         }
     }
@@ -122,8 +129,8 @@ class BookmarkServiceTest {
     class AddBookmarkTest {
 
         @Test
-        @DisplayName("성공: 유효한 사용자와 게시글로 북마크를 추가한다")
-        void addBookmark_WithValidUserAndPost_AddsBookmark() {
+        @DisplayName("성공: 유효한 사용자와 게시글로 북마크를 추가하면 bookmarkCount가 증가한다")
+        void addBookmark_WithValidUserAndPost_AddsBookmarkAndIncreasesCount() {
             // Given: 유효한 사용자와 게시글이 있을 때
             Long userId = 1L;
             Long postId = 1L;
@@ -134,7 +141,8 @@ class BookmarkServiceTest {
             // When: 북마크를 추가하면
             bookmarkService.addBookmark(userId, postId);
 
-            // Then: 북마크가 저장된다
+            // Then: 북마크가 저장되고 bookmarkCount가 증가한다
+            assertThat(testPost.getBookmarkCount()).isEqualTo(1L);
             then(bookmarkRepository).should().save(any(Bookmark.class));
         }
 
@@ -175,17 +183,37 @@ class BookmarkServiceTest {
     class RemoveBookmarkTest {
 
         @Test
-        @DisplayName("성공: 북마크를 삭제한다")
-        void removeBookmark_RemovesSuccessfully() {
-            // Given: 북마크가 존재할 때
+        @DisplayName("성공: 북마크를 삭제하면 bookmarkCount가 감소한다")
+        void removeBookmark_RemovesSuccessfullyAndDecreasesCount() {
+            // Given: 북마크가 존재하고 bookmarkCount가 1일 때
             Long userId = 1L;
             Long postId = 1L;
+            
+            testPost.increaseBookmarkCount(); // 기존 북마크로 인해 1
+            
+            given(postRepository.findById(postId)).willReturn(Optional.of(testPost));
 
             // When: 북마크를 삭제하면
             bookmarkService.removeBookmark(userId, postId);
 
-            // Then: 북마크가 삭제된다
+            // Then: 북마크가 삭제되고 bookmarkCount가 감소한다
+            assertThat(testPost.getBookmarkCount()).isEqualTo(0L);
             then(bookmarkRepository).should().deleteByUserIdAndPostId(userId, postId);
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 게시글의 북마크를 삭제하려 하면 예외가 발생한다")
+        void removeBookmark_NonExistentPost_ThrowsException() {
+            // Given: 존재하지 않는 게시글 ID로 삭제를 시도할 때
+            Long userId = 1L;
+            Long postId = 999L;
+
+            given(postRepository.findById(postId)).willReturn(Optional.empty());
+
+            // When & Then: 예외가 발생한다
+            assertThatThrownBy(() -> bookmarkService.removeBookmark(userId, postId))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("게시글을 찾을 수 없습니다.");
         }
     }
 
@@ -287,4 +315,3 @@ class BookmarkServiceTest {
         }
     }
 }
-

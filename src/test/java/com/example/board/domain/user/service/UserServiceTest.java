@@ -114,8 +114,8 @@ class UserServiceTest {
     class LoginTest {
 
         @Test
-        @DisplayName("성공: 올바른 아이디와 비밀번호로 로그인하면 사용자 ID를 반환한다")
-        void login_WithValidCredentials_ReturnsUserId() {
+        @DisplayName("성공: 올바른 아이디와 비밀번호로 로그인하면 User 객체를 반환한다")
+        void login_WithValidCredentials_ReturnsUser() {
             // Given: 유효한 로그인 정보가 있을 때
             LoginRequest request = new LoginRequest();
             request.setLoginId("testuser");
@@ -132,10 +132,13 @@ class UserServiceTest {
             given(passwordEncoder.matches("password123", "encodedPassword")).willReturn(true);
 
             // When: 로그인을 시도하면
-            User userId = userService.login(request);
+            User loggedInUser = userService.login(request);
 
-            // Then: 사용자 ID가 반환된다
-            assertThat(userId).isEqualTo(user.getId());
+            // Then: User 객체가 반환된다
+            assertThat(loggedInUser).isNotNull();
+            assertThat(loggedInUser.getLoginId()).isEqualTo("testuser");
+            assertThat(loggedInUser.getUsername()).isEqualTo("테스트유저");
+            assertThat(loggedInUser.getRole()).isEqualTo(Role.USER);
         }
 
         @Test
@@ -221,4 +224,3 @@ class UserServiceTest {
         }
     }
 }
-

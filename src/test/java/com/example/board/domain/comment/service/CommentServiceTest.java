@@ -30,6 +30,7 @@ import com.example.board.domain.user.repository.UserRepository;
  * 
  * Narrative: 댓글 서비스는 게시글에 대한 댓글 작성, 수정, 삭제 기능을 제공하며,
  *            대댓글(답글) 기능도 지원한다.
+ *            댓글 수정/삭제는 작성자 본인만 가능하다.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CommentService 단위 테스트")
@@ -48,6 +49,7 @@ class CommentServiceTest {
     private UserRepository userRepository;
 
     private User testUser;
+    private User otherUser;
     private Post testPost;
     private Comment testComment;
 
@@ -60,6 +62,14 @@ class CommentServiceTest {
                 .role(Role.USER)
                 .build();
         ReflectionTestUtils.setField(testUser, "id", 1L);
+
+        otherUser = User.builder()
+                .loginId("otheruser")
+                .password("password")
+                .username("다른유저")
+                .role(Role.USER)
+                .build();
+        ReflectionTestUtils.setField(otherUser, "id", 2L);
 
         testPost = Post.builder()
                 .user(testUser)
@@ -198,19 +208,36 @@ class CommentServiceTest {
     class UpdateCommentTest {
 
         @Test
-        @DisplayName("성공: 댓글을 수정하면 내용이 변경된다")
-        void updateComment_WithValidId_UpdatesContent() {
-            // Given: 존재하는 댓글이 있을 때
+        @DisplayName("성공: 작성자 본인이 댓글을 수정하면 내용이 변경된다")
+        void updateComment_ByOwner_UpdatesContent() {
+            // Given: 존재하는 댓글이 있고 작성자 본인이 수정할 때
             Long commentId = 1L;
+            Long userId = 1L; // testUser의 ID
             String newContent = "수정된 댓글입니다.";
 
             given(commentRepository.findById(commentId)).willReturn(Optional.of(testComment));
 
             // When: 댓글을 수정하면
-            commentService.updateComment(commentId, newContent);
+            commentService.updateComment(commentId, userId, newContent);
 
             // Then: 댓글 내용이 변경된다
             assertThat(testComment.getContent()).isEqualTo(newContent);
+        }
+
+        @Test
+        @DisplayName("실패: 작성자가 아닌 사용자가 댓글을 수정하면 예외가 발생한다")
+        void updateComment_ByNonOwner_ThrowsException() {
+            // Given: 다른 사용자가 댓글을 수정하려고 할 때
+            Long commentId = 1L;
+            Long otherUserId = 2L; // 다른 유저의 ID
+            String newContent = "수정된 댓글입니다.";
+
+            given(commentRepository.findById(commentId)).willReturn(Optional.of(testComment));
+
+            // When & Then: 예외가 발생한다
+            assertThatThrownBy(() -> commentService.updateComment(commentId, otherUserId, newContent))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("본인이 작성한 댓글만 수정할 수 있습니다.");
         }
 
         @Test
@@ -218,10 +245,11 @@ class CommentServiceTest {
         void updateComment_NonExistentComment_ThrowsException() {
             // Given: 존재하지 않는 댓글 ID로 수정을 시도할 때
             Long commentId = 999L;
+            Long userId = 1L;
             given(commentRepository.findById(commentId)).willReturn(Optional.empty());
 
             // When & Then: 예외가 발생한다
-            assertThatThrownBy(() -> commentService.updateComment(commentId, "수정 내용"))
+            assertThatThrownBy(() -> commentService.updateComment(commentId, userId, "수정 내용"))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("존재하지 않는 댓글입니다.");
         }
@@ -232,14 +260,15 @@ class CommentServiceTest {
     class DeleteCommentTest {
 
         @Test
-        @DisplayName("성공: 댓글을 삭제하면 소프트 삭제가 적용된다")
-        void deleteComment_WithValidId_SoftDeletes() {
-            // Given: 존재하는 댓글이 있을 때
+        @DisplayName("성공: 작성자 본인이 댓글을 삭제하면 소프트 삭제가 적용된다")
+        void deleteComment_ByOwner_SoftDeletes() {
+            // Given: 존재하는 댓글이 있고 작성자 본인이 삭제할 때
             Long commentId = 1L;
+            Long userId = 1L; // testUser의 ID
             given(commentRepository.findById(commentId)).willReturn(Optional.of(testComment));
 
             // When: 댓글을 삭제하면
-            commentService.deleteComment(commentId);
+            commentService.deleteComment(commentId, userId);
 
             // Then: 소프트 삭제가 적용된다 (isDeleted = true, content = "삭제된 댓글입니다.")
             assertThat(testComment.isDeleted()).isTrue();
@@ -247,14 +276,30 @@ class CommentServiceTest {
         }
 
         @Test
+        @DisplayName("실패: 작성자가 아닌 사용자가 댓글을 삭제하면 예외가 발생한다")
+        void deleteComment_ByNonOwner_ThrowsException() {
+            // Given: 다른 사용자가 댓글을 삭제하려고 할 때
+            Long commentId = 1L;
+            Long otherUserId = 2L; // 다른 유저의 ID
+
+            given(commentRepository.findById(commentId)).willReturn(Optional.of(testComment));
+
+            // When & Then: 예외가 발생한다
+            assertThatThrownBy(() -> commentService.deleteComment(commentId, otherUserId))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("본인이 작성한 댓글만 삭제할 수 있습니다.");
+        }
+
+        @Test
         @DisplayName("실패: 존재하지 않는 댓글을 삭제하면 예외가 발생한다")
         void deleteComment_NonExistentComment_ThrowsException() {
             // Given: 존재하지 않는 댓글 ID로 삭제를 시도할 때
             Long commentId = 999L;
+            Long userId = 1L;
             given(commentRepository.findById(commentId)).willReturn(Optional.empty());
 
             // When & Then: 예외가 발생한다
-            assertThatThrownBy(() -> commentService.deleteComment(commentId))
+            assertThatThrownBy(() -> commentService.deleteComment(commentId, userId))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("존재하지 않는 댓글입니다.");
         }
@@ -294,4 +339,3 @@ class CommentServiceTest {
         }
     }
 }
-
