@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 	<head
 		th:replace="~{fragments/layout :: head('게시글 - Spring Board')}"
 	></head>
@@ -164,7 +165,7 @@
 						</h5>
 
 						<!-- 댓글 작성 폼 -->
-						<div th:if="${session.loginUserId != null}" class="mb-4">
+						<div sec:authorize="isAuthenticated()" class="mb-4">
 							<div class="d-flex gap-3">
 								<div
 									class="bg-secondary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
@@ -198,7 +199,7 @@
 						</div>
 
 						<div
-							th:if="${session.loginUserId == null}"
+							sec:authorize="!isAuthenticated()"
 							class="text-center py-4 text-muted"
 						>
 							<i class="bi bi-lock fs-3 d-block mb-2"></i>
@@ -287,7 +288,8 @@
 											</p>
 											<!-- 대댓글 작성 버튼 -->
 											<button
-												th:if="${session.loginUserId != null && !comment.deleted}"
+												sec:authorize="isAuthenticated()"
+												th:if="${!comment.deleted}"
 												class="btn btn-sm btn-link text-muted p-0"
 												th:onclick="'showReplyForm(' + ${comment.id} + ')'"
 											>

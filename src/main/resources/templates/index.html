@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 	<head th:replace="~{fragments/layout :: head('Spring Board - 홈')}"></head>
 	<body class="d-flex flex-column">
 		<nav th:replace="~{fragments/layout :: navbar}"></nav>
@@ -17,7 +18,7 @@
 						</h2>
 						<p class="text-muted mb-0">다양한 이야기를 자유롭게 나눠보세요</p>
 					</div>
-					<div th:if="${session.loginUserId != null}">
+					<div sec:authorize="isAuthenticated()">
 						<a href="/posts/write" class="btn btn-primary-custom">
 							<i class="bi bi-pencil-square me-1"></i>글쓰기
 						</a>
@@ -65,10 +66,10 @@
 											<div class="text-muted">
 												<i class="bi bi-inbox fs-1 d-block mb-3"></i>
 												<p class="mb-2">아직 게시글이 없습니다</p>
-												<p class="small" th:if="${session.loginUserId != null}">
+												<p class="small" sec:authorize="isAuthenticated()">
 													첫 번째 글을 작성해보세요!
 												</p>
-												<p class="small" th:if="${session.loginUserId == null}">
+												<p class="small" sec:authorize="!isAuthenticated()">
 													로그인하고 첫 번째 글을 작성해보세요!
 												</p>
 											</div>
