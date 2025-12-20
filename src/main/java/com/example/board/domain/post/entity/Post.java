@@ -46,16 +46,16 @@ public class Post extends BaseTimeEntity{
 
     
 
-    @Column(columnDefinition = "integer default 0", nullable=false)
+    @Column(columnDefinition = "bigint default 0", nullable=false)
     private Long viewCount = 0L;
     
-    @Column(columnDefinition = "integer default 0", nullable=false)
+    @Column(columnDefinition = "bigint default 0", nullable=false)
     private Long likeCount = 0L;
     
-    @Column(columnDefinition = "integer default 0", nullable=false)
+    @Column(columnDefinition = "bigint default 0", nullable=false)
     private Long dislikeCount = 0L;
     
-    @Column(columnDefinition = "integer default 0", nullable=false)
+    @Column(columnDefinition = "bigint default 0", nullable=false)
     private Long bookmarkCount = 0L;
 
     @Builder
