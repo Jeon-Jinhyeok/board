@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -42,6 +44,18 @@ public class PostService {
                 .stream()
                 .map(PostResponse::fromList)
                 .collect(Collectors.toList());
+    }
+
+    // 전체 게시글 페이징 조회 (최신순)
+    public Page<PostResponse> getAllPosts(Pageable pageable) {
+        return postRepository.findAllByOrderByCreatedAtDesc(pageable)
+                .map(PostResponse::fromList);
+    }
+
+    // 카테고리별 게시글 페이징 조회 (최신순)
+    public Page<PostResponse> getPostsByCategory(Long categoryId, Pageable pageable) {
+        return postRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable)
+                .map(PostResponse::fromList);
     }
 
     // 게시글 상세 조회

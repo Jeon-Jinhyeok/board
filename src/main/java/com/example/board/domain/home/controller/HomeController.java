@@ -2,6 +2,9 @@ package com.example.board.domain.home.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,16 +37,21 @@ public class HomeController {
     @GetMapping("/")
     public String home(
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model
-    ) {
+    ){
+        // 페이지네이션 설정
+        Pageable pageable = PageRequest.of(page, size);
+        
         // 게시글 목록 조회 (카테고리 필터 적용)
-        List<PostResponse> posts;
+        Page<PostResponse> posts;
         if (categoryId != null) {
-            posts = postService.getPostsByCategory(categoryId);
+            posts = postService.getPostsByCategory(categoryId, pageable);
             model.addAttribute("selectedCategoryId", categoryId);
         } else {
-            posts = postService.getAllPosts();
+            posts = postService.getAllPosts(pageable);
         }
         model.addAttribute("posts", posts);
 
