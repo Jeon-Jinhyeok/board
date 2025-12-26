@@ -147,22 +147,6 @@
 		<footer th:replace="~{fragments/layout :: footer}"></footer>
 		<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 		
-		<script>
-			function toggleNewCategory(select) {
-				const newCategoryDiv = document.getElementById('newCategoryDiv');
-				const newCategoryInput = document.getElementById('newCategoryName');
-				
-				if (select.value === 'new') {
-					newCategoryDiv.style.display = 'block';
-					newCategoryInput.focus();
-					// categoryId를 비워서 서버에서 newCategoryName을 사용하도록 함
-					select.value = '';
-				} else {
-					newCategoryDiv.style.display = 'none';
-					newCategoryInput.value = '';
-				}
-			}
-		</script>
+		<script src="/js/write.js"></script>
 	</body>
 </html>
-
